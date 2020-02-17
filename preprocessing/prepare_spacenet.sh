@@ -16,8 +16,8 @@ UNDERLINE='\033[4m'
 
 printf "${BLUE}${BOLD}Spacenet Data Base Dir => %s \n${NC}" $spacenet_base_dir
 
-printf "${GREEN}${UNDERLINE}${BOLD}\n Converting Spacenet 11-bit RGB images to 8-bit. ${NC}\n"
-python spacenet/convert_to_8bit_png.py -d $spacenet_base_dir
+# printf "${GREEN}${UNDERLINE}${BOLD}\n Converting Spacenet 11-bit RGB images to 8-bit. ${NC}\n"
+# python spacenet/convert_to_8bit_png.py -d $spacenet_base_dir
 
 printf "${GREEN}${UNDERLINE}${BOLD}\n Creating Spacenet gaussian road labels. ${NC}\n"
 python spacenet/create_gaussian_label.py -d $spacenet_base_dir

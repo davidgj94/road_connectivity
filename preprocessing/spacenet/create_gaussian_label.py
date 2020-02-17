@@ -24,6 +24,7 @@ import time
 from osgeo import gdal
 import geoTools as gT
 from tqdm import tqdm
+from vis import vis_seg, make_palette
 tqdm.monitor_interval = 0
 
 
@@ -42,13 +43,15 @@ def CreateGaussianLabel(base_dir):
 
 		geojson_dir = os.path.join(base_dir,'{country}/geojson_roads/'.format(country=country))
 		rgb_dir = os.path.join(base_dir,'{country}/PS-RGB/'.format(country=country))
+		rgb_8b_dir = os.path.join(base_dir,'{country}/RGB_8bit/'.format(country=country))
 
 		roads_dir = os.path.join(base_dir,'{country}/gaussian_roads'.format(country=country))
 
 		if os.path.isdir(roads_dir) == False:
 			os.makedirs(roads_dir)
-			os.makedirs(os.path.join(roads_dir,'label_tif'))
-			os.makedirs(os.path.join(roads_dir,'label_png'))
+			os.makedirs(os.path.join(roads_dir, 'label_tif'))
+			os.makedirs(os.path.join(roads_dir, 'label_png'))
+			os.makedirs(os.path.join(roads_dir, 'vis'))
 
 
 		## The default image size of Spacenet Dataset is 1300x1300.
@@ -74,6 +77,7 @@ def CreateGaussianLabel(base_dir):
 
 			out_tif_file = os.path.join(roads_dir,'label_tif', img_name_template.format('tif'))
 			out_png_file = os.path.join(roads_dir,'label_png', img_name_template.format('png'))
+			out_vis_file = os.path.join(roads_dir,'vis', img_name_template.format('png'))
 			
 			geojson_file = os.path.join(geojson_dir, geojson_name)
 			tif_file = os.path.join(rgb_dir, img_name_template.format('tif'))
@@ -93,8 +97,13 @@ def CreateGaussianLabel(base_dir):
 				distance_array = distance_transform_edt(1-(gt_array/255))
 				std = 15
 				distance_array =  np.exp(-0.5*(distance_array*distance_array)/(std*std))
-				distance_array *= 255
-				cv2.imwrite(out_png_file,distance_array)
+				cv2.imwrite(out_png_file, (distance_array * 255).astype(np.uint8))
+				
+				hard_label = np.zeros_like(distance_array, dtype=np.uint8)
+				hard_label[distance_array > 0.76] = 1
+				vis_img = cv2.imread(os.path.join(rgb_8b_dir, img_name_template.format('png')))
+				vis_img = vis_seg(vis_img, hard_label, make_palette(2))
+				cv2.imwrite(out_vis_file, vis_img)
 
 			# print('\t|--> Processed Images : {}'.format(index), end='\r')
 			# sys.stdout.flush()
