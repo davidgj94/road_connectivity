@@ -209,9 +209,9 @@ def convert_wgs84geojson_to_pixgeojson(wgs84geojson, inputraster, image_id=[], p
     
     dataSource = ogr.Open(wgs84geojson, 0)
     if dataSource is None:
-        print '='*50
-        print 'GeoJson {} has no Coordinates.'.format(wgs84geojson)
-        print '='*50
+        print('='*50)
+        print('GeoJson {} has no Coordinates.'.format(wgs84geojson))
+        print('='*50)
         return
     layer = dataSource.GetLayer()
     #print(layer.GetFeatureCount())
@@ -356,11 +356,11 @@ def ConvertToRoadSegmentation(tif_file,geojson_file,out_file,isInstance=False):
     #Read Dataset from geo json file
     dataset = ogr.Open(geojson_file)
     if not dataset:
-        print 'No Dataset'
+        print('No Dataset')
         return -1
     layer = dataset.GetLayerByIndex(0)
     if not layer:
-        print 'No Layer'
+        print('No Layer')
         return -1
     
     # First we will open our raster image, to understand how we will want to rasterize our vector
