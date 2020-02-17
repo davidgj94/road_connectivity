@@ -31,6 +31,7 @@ import numpy as np
 from skimage import io
 from tqdm import tqdm
 tqdm.monitor_interval = 0
+import shutil
 
 
 
@@ -44,6 +45,10 @@ def verify_image(img_file):
 def CreatCrops(base_dir, crop_type, size, stride, image_suffix, gt_suffix):
 
     crops = os.path.join(base_dir, '{}_crops'.format(crop_type))
+    if os.path.exists(crops):
+        shutil.rmtree(crops, ignore_errors=True)
+    os.makedirs(os.path.join(crops, 'images'))
+    os.makedirs(os.path.join(crops, 'gt'))
     crops_file = open(os.path.join(base_dir,'{}_crops.txt'.format(crop_type)),'w')
 
     full_file_path = os.path.join(base_dir,'{}.txt'.format(crop_type))
@@ -81,8 +86,8 @@ def CreatCrops(base_dir, crop_type, size, stride, image_suffix, gt_suffix):
             continue
 
         H,W,C = image.shape
-        maxx = (H-size)/stride
-        maxy = (W-size)/stride
+        maxx = (H-size)//stride
+        maxy = (W-size)//stride
         
         for x in range(maxx+1):
             for y in range(maxy+1):
@@ -110,17 +115,20 @@ def main():
         help='Dataset specific image suffix.')
     parser.add_argument('--gt_suffix', type=str, required=True, 
         help='Dataset specific gt suffix.')
+    parser.add_argument('-crop_train', dest='crop_train', action='store_true')
+    parser.set_defaults(crop_train=False)
 
     args = parser.parse_args()
 
     start = time.clock()
-    ## Create overlapping Crops for training
-    CreatCrops(args.base_dir, 
-                crop_type='train', 
-                size=args.crop_size, 
-                stride=args.crop_overlap,
-                image_suffix=args.im_suffix, 
-                gt_suffix=args.gt_suffix)
+    if args.crop_train:
+        ## Create overlapping Crops for training
+        CreatCrops(args.base_dir, 
+                    crop_type='train', 
+                    size=args.crop_size, 
+                    stride=args.crop_overlap,
+                    image_suffix=args.im_suffix, 
+                    gt_suffix=args.gt_suffix)
 
     ## Create non-overlapping Crops for validation
     CreatCrops(args.base_dir, 
